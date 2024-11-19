@@ -1,8 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useCounterStore } from '@/stores/counter'
+import { useCounterStore } from '@/stores/counter'  // 로그인 상태 확인용 store
 import ArticleView from '@/views/ArticleView.vue'
 import DetailView from '@/views/DetailView.vue'
-import CreateView from '@/views/CreateView.vue'
 import SignUpView from '@/views/SignUpView.vue'
 import LogInView from '@/views/LogInView.vue'
 
@@ -15,42 +14,37 @@ const router = createRouter({
       component: ArticleView
     },
     {
-      path: '/articles/:id',
+      path: '/detail/:id',
       name: 'DetailView',
       component: DetailView
     },
-    {
-      path: '/create',
-      name: 'CreateView',
-      component: CreateView
-    },
-    {
-      path: '/signup',
-      name: 'SignUpView',
-      component: SignUpView
-    },
-    {
-      path: '/login',
-      name: 'LogInView',
-      component: LogInView
-    }
+    // {
+    //   path: '/signup',
+    //   name: 'SignUpView',
+    //   component: SignUpView
+    // },
+    // {
+    //   path: '/login',
+    //   name: 'LogInView',
+    //   component: LogInView
+    // }
   ]
 })
 
+// 라우터에 beforeEach 훅 추가
 router.beforeEach((to, from) => {
-  // store를 반드시 안에 작성
   const store = useCounterStore()
-  // 만약 이동하는 목적지가 메인 페이지이면서,
-  // 현재 로그인 상태가 아니라면 로그인 페이지로 보냄
+  
+  // 로그인하지 않은 상태에서 메인 페이지에 접근하려는 경우
   if (to.name === 'ArticleView' && !store.isLogin) {
     window.alert('로그인이 필요합니다.')
-    return { name: 'LogInView' }
+    return { name: 'LogInView' } // 로그인 페이지로 리다이렉트
   }
-  // 만약 로그인 사용자가 회원가입 또는 로그인 페이지로 이동하려고 하면
-  // 메인페이지로 보냄
-  if ((to.name === 'SignUpView' || to.name === 'LogInView') && (store.isLogin)) {
+
+  // 로그인한 상태에서 회원가입 또는 로그인 페이지에 접근하려는 경우
+  if ((to.name === 'SignUpView' || to.name === 'LogInView') && store.isLogin) {
     window.alert('이미 로그인이 되어있습니다.')
-    return { name: 'ArticleView' }
+    return { name: 'ArticleView' } // 메인 페이지로 리다이렉트
   }
 })
 

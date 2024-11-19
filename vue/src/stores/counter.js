@@ -4,13 +4,13 @@ import axios from 'axios'
 import { useRouter } from 'vue-router'
 
 export const useCounterStore = defineStore('counter', () => {
-  const articles = ref([])
+  const articles = ref([])  // 기존 게시글 데이터
+  const movies = ref([])     // 최신 영화 데이터
   const API_URL = 'http://127.0.0.1:8000'
   const token = ref(null)
   const router = useRouter()
 
   // 인증 상태 여부를 나타낼 속성 값 지정
-  // token 소유 여부에 따라 로그인 상태를 나타낼 변수 작성
   const isLogin = computed(() => {
     if (token.value === null) {
       return false
@@ -29,19 +29,33 @@ export const useCounterStore = defineStore('counter', () => {
       }
     })
       .then((res) => {
-        // console.log(res.data)
         articles.value = res.data
       })
       .catch((err) => {
         console.log(err)
       })
   }
+
+  // TMDB에서 최신 영화를 가져오는 함수
+  const getMovies = function () {
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY  // 환경 변수로 API 키를 가져옵니다
+    const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${apiKey}&language=ko-KR&region=KR`
   
+    return axios({
+      method: 'get',
+      url: url
+    })
+      .then((res) => {
+        movies.value = res.data.results || []  // TMDB 응답에서 results 배열을 저장
+      })
+      .catch((err) => {
+        console.log('Failed to fetch movies:', err)
+      })
+  }
+  
+
   // 회원가입 요청 액션
   const signUp = (payload) => {
-    // const username = payload.username
-    // const password1 = payload.password1
-    // const password2 = payload.password2
     const { username, password1, password2 } = payload
 
     axios({
@@ -52,8 +66,6 @@ export const useCounterStore = defineStore('counter', () => {
       }
     })
       .then(res => {
-        // console.log(res)
-        // console.log('회원가입이 완료되었습니다.')
         const password = password1
         logIn({ username, password })
       })
@@ -74,11 +86,19 @@ export const useCounterStore = defineStore('counter', () => {
       .then(res => {
         token.value = res.data.key
         router.push({ name: 'ArticleView' })
-        // console.log(res.data)
-        // console.log('로그인이 완료되었습니다.')
       })
       .catch(err => console.log(err))
   }
-  
-  return { articles, API_URL, getArticles, signUp, logIn, token, isLogin }
+
+  return { 
+    articles, 
+    movies,  // movies 배열 추가
+    API_URL, 
+    getArticles, 
+    getMovies,  // getMovies 함수 추가
+    signUp, 
+    logIn, 
+    token, 
+    isLogin 
+  }
 }, { persist: true })
