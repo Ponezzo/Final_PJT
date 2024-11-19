@@ -1,5 +1,5 @@
 """
-URL configuration for Final_project project.
+URL configuration for pjt project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
@@ -19,17 +19,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
-    # movies 앱
-    path('api/v1/', include('movies.urls')),  # 이미 설정된 movies 앱 경로
-    
-    # 사용자 인증 관련 URL
-    path('users/', include('dj_rest_auth.urls')),  # 로그인, 로그아웃, 비밀번호 변경 등
-    path('users/signup/', include('dj_rest_auth.registration.urls')),  # 회원가입 관련
-    
-    # 리뷰 관련 URL
-    path('api/v1/reviews/', include('reviews.urls')),  # 리뷰 관련 API 엔드포인트
-    
-    # 커뮤니티 관련 URL
-    path('api/v1/community/', include('community.urls')),  # 커뮤니티 게시판 관련 API 엔드포인트
+    path('api/v1/', include('movies.urls')),
+    path('accounts/', include('dj_rest_auth.urls')),
+    path('accounts/signup/', include('dj_rest_auth.registration.urls')),
 ]
