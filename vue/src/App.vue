@@ -1,53 +1,70 @@
 <template>
   <div id="app">
-    <!-- Navbar, 상단 네비게이션 추가 -->
     <header class="navbar">
       <div class="navbar__container">
-        <router-link to="/" class="navbar__logo">MovieCINE</router-link>
+        <!-- 왼쪽 그룹 -->
+        <div class="navbar__left">
+          <img src="@/assets/GoodLogo.png" alt="Logoimg" class="logoimg" @click="goHome" />
+          <router-link to="/" class="Home">MovieCINE</router-link>
+        </div>
+        <!-- 오른쪽 그룹 -->
+        <div class="navbar__right">
+          <!-- 로그인되지 않은 경우 Signup, Login 보이기 -->
+          <router-link v-if="!isLoggedIn" to="/signup" class="SignUp">Signup</router-link>
+          <router-link v-if="!isLoggedIn" to="/login" class="Login">Login</router-link>
+          
+          <!-- 로그인된 경우 Logout 텍스트 보이기, 버튼 대신 클릭 이벤트로 로그아웃 -->
+          <router-link v-if="isLoggedIn" to="/profile" class="Profile">Profile</router-link>
+          <button v-if="isLoggedIn" @click="logOut" class="Logout">Logout</button>
+        </div>
       </div>
     </header>
+
+    <!-- Fade-in/Fade-out 애니메이션 추가 -->
+    <transition name="fade" mode="out-in">
+      <router-view />
+    </transition>
   </div>
-    <!-- 라우터 뷰는 각 경로에 해당하는 컴포넌트를 렌더링합니다. -->
-    <router-view />
 </template>
 
 <script setup>
-// Vue 3에서는 router-view와 관련된 라우터 설정을 앱에서 설정합니다.
-import { createApp } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
-import ArticleView from './views/ArticleView.vue'
-import DetailView from './views/DetailView.vue'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useCounterStore } from '@/stores/counter'  // Pinia store 가져오기
 
-// 라우트 정의
-const routes = [
-  { path: '/', component: ArticleView },           // 메인 페이지
-  { path: '/detail/:id', component: DetailView }   // 영화 상세 페이지
-]
+const router = useRouter()
+const store = useCounterStore()
 
-// 라우터 인스턴스 생성
-const router = createRouter({
-  history: createWebHistory(),
-  routes
-})
+// 홈으로 가는 함수
+const goHome = () => {
+  router.push('/')
+}
 
-// 앱 인스턴스를 생성하고 라우터를 사용하여 마운트합니다.
-const app = createApp({})
-app.use(router)
-app.mount('#app')
+// 로그인 상태 계산 (Pinia store의 isLogin을 기반으로)
+const isLoggedIn = computed(() => store.isLogin)
+
+// 로그아웃 함수
+const logOut = () => {
+  store.logOut()  // Pinia store에서 로그아웃 처리
+  router.push('/login')  // 로그아웃 후 로그인 페이지로 이동
+}
 </script>
 
 <style scoped>
-/* Navbar 스타일 */
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background-image: linear-gradient(to top, #1c1a27 100%);
-  color: white;
-  z-index: 1000;
+/* Fade-in/Fade-out 효과 */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 1s ease; /* 전환 속도 조절 */
 }
 
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to, .fade-leave-from {
+  opacity: 1;
+}
+
+/* Navbar 스타일 */
 .navbar__container {
   display: flex;
   justify-content: space-between;
@@ -55,12 +72,42 @@ app.mount('#app')
   max-width: 1200px;
   margin: 0 auto;
   padding: 10px 20px;
+  background-color:transparent;
 }
 
-.navbar__logo {
-  font-size: 24px;
-  font-weight: bold;
-  color: white;
+.navbar__left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar__right {
+  display: flex;
+  gap: 20px;
+}
+
+.logoimg {
+  height: 40px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.Home, .SignUp, .Login, .Logout, .Profile {
+  font-size: 18px;
   text-decoration: none;
+  color: white;
+  cursor: pointer;
+}
+
+.Logout {
+  font-size: 18px;  /* 텍스트 크기 조정 */
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-family: 'GowunBatang-Regular';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunBatang-Regular.woff') format('woff');
+  font-weight: normal;
+  font-stretch: semi-expanded;
+  font-style: normal;
 }
 </style>
