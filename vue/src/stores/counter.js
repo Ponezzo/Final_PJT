@@ -113,8 +113,15 @@ export const useCounterStore = defineStore('counter', () => {
     if (token.value && !likedMovies.value.includes(movieId)) {
       likedMovies.value.push(movieId)
       localStorage.setItem(`likedMovies_${token.value}`, JSON.stringify(likedMovies.value))  // 로컬 스토리지에 저장
+  
+      // 좋아요한 영화를 최신 영화 목록에 추가
+      const movieToAdd = movies.value.find(movie => movie.id === movieId)
+      if (movieToAdd && !likedMovies.value.includes(movieId)) {
+        likedMovies.value.push(movieToAdd)  // 최신 영화 목록에 좋아요한 영화 추가
+      }
     }
   }
+  
 
   // 좋아요 취소
   const removeLikedMovie = (movieId) => {

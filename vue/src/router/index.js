@@ -6,6 +6,9 @@ import SignUpView from '@/views/SignUpView.vue'
 import LogInView from '@/views/LogInView.vue'
 import LogoutView from '@/views/LogoutView.vue'
 import ProfileView from '@/views/ProfileView.vue'
+import SearchView from '@/views/SearchView.vue'
+import SearchList from '@/views/SearchList.vue'
+import SearchDetail from '@/views/SearchDetail.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,7 +21,8 @@ const router = createRouter({
     {
       path: '/detail/:id',
       name: 'DetailView',
-      component: DetailView
+      component: () => import('@/views/DetailView.vue'),
+      props: true
     },
     {
       path: '/signup',
@@ -39,7 +43,23 @@ const router = createRouter({
       path: '/profile',
       name: 'ProfileView',
       component: ProfileView
-    }
+    },
+    {
+      path: '/search',
+      name: 'SearchView',
+      component: SearchView
+    },
+    {
+      path: '/search-list', 
+      name: 'SearchList', 
+      component: SearchList
+    },
+    {
+      path: '/search-detail/:id', 
+      name: 'SearchDetail', 
+      component: SearchDetail,
+      props: true
+    },
   ]
 })
 

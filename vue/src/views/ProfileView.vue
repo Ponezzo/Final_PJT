@@ -1,14 +1,20 @@
 <template>
   <div class="profile-container">
     <div class="left-section">
-      <div v-if="favoriteMovie" class="favorite-movie">
-        <h2 class="section-title"></h2>
-        <img 
-          :src="'https://image.tmdb.org/t/p/original' + favoriteMovie.poster_path" 
-          :alt="favoriteMovie.title + ' Poster'" 
-          class="favorite-movie-poster"
-        />
-        <!-- <p class="movie-title-2">{{ favoriteMovie.title }}</p> -->
+      <div class="favorite-movie">
+        <!-- 좋아요 리스트가 비어있거나 최애 영화가 없을 경우 -->
+        <template v-if="!favoriteMovie || likedMovies.length === 0">
+          <p class="no-favorite-movie">최애 영화를 선택해주세요.</p>
+        </template>
+        <!-- 최애 영화가 있을 경우 -->
+        <template v-else>
+          <h2 class="section-title"></h2>
+          <img 
+            :src="'https://image.tmdb.org/t/p/original' + favoriteMovie.poster_path" 
+            :alt="favoriteMovie.title + ' Poster'" 
+            class="favorite-movie-poster"
+          />
+        </template>
       </div>
     </div>
     <div class="right-section">
@@ -31,19 +37,16 @@
             <div v-if="isSelected(movie.id)" class="checkmark">✔</div>
           </div>
         </div>
-        <!-- 버튼을 좋아요한 영화 리스트 오른쪽에 배치 -->
         <button @click="toggleSelectMode" class="select-favorite-button">
           {{ selectMode ? '선택 완료' : '최애영화 선택하기' }}
         </button>
       </div>
 
-      <!-- 내가 쓴 게시글 -->
       <div class="my-posts">
         <h2 class="section-title">내가 쓴 게시글</h2>
         <p class="no-posts">게시글이 없습니다.</p>
       </div>
 
-      <!-- 내가 쓴 댓글 -->
       <div class="my-comments">
         <h2 class="section-title">내가 쓴 댓글</h2>
         <p class="no-comments">댓글이 없습니다.</p>
@@ -53,43 +56,55 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, watchEffect } from 'vue'
+import { ref, computed, watchEffect, watch } from 'vue'
 import { useCounterStore } from '@/stores/counter'
 import { useRouter } from 'vue-router'
 
 const counterStore = useCounterStore()
 const router = useRouter()
 
-// 상태 관리
-const selectMode = ref(false)  // 최애영화 선택 모드 활성화 여부
-const selectedMovieId = ref(null)  // 선택된 영화 ID
+const selectMode = ref(false)
+const selectedMovieId = ref(null)
 
-// 좋아요한 영화 목록
+// 좋아요한 영화 목록 계산
 const likedMovies = computed(() => {
+  // 좋아요 리스트에 포함된 영화들만 필터링
   return counterStore.movies.filter(movie => counterStore.likedMovies.includes(movie.id))
 })
 
-// 최애 영화 ID를 로컬 스토리지에서 읽어오기
+// 로컬 스토리지에 저장된 최애 영화 ID 가져오기
 const favoriteMovieId = ref(localStorage.getItem('favoriteMovieId'))
 
-// 로컬 스토리지에서 최애영화가 변경될 때마다 반응하도록 처리
+// 최애 영화 계산
 const favoriteMovie = computed(() => {
-  if (favoriteMovieId.value) {
-    return counterStore.movies.find(movie => movie.id === parseInt(favoriteMovieId.value))
+  // 좋아요 리스트가 비어 있거나, 최애 영화가 좋아요 리스트에 포함되지 않으면 null 반환
+  if (
+    likedMovies.value.length === 0 ||
+    !likedMovies.value.some(movie => movie.id === parseInt(favoriteMovieId.value))
+  ) {
+    return null
   }
-  return null
+  return counterStore.movies.find(movie => movie.id === parseInt(favoriteMovieId.value))
 })
 
-// 최애영화 선택 모드 토글
+// 좋아요 리스트 변화 감지
+watch(likedMovies, (newLikedMovies) => {
+  console.log('Liked Movies Updated:', newLikedMovies) // 좋아요 리스트 상태 출력
+  if (newLikedMovies.length === 0) {
+    // 좋아요 리스트가 비면 최애 영화 초기화
+    favoriteMovieId.value = null
+    localStorage.removeItem('favoriteMovieId')
+  }
+})
+
+// 최애 영화 선택 모드 토글
 const toggleSelectMode = () => {
   selectMode.value = !selectMode.value
-  if (!selectMode.value) {
-    // 선택 모드 종료 시 최애영화 설정
-    if (selectedMovieId.value) {
-      localStorage.setItem('favoriteMovieId', selectedMovieId.value)
-      favoriteMovieId.value = selectedMovieId.value  // 반영 후 업데이트
-      counterStore.setFavoriteMovie(selectedMovieId.value)
-    }
+  if (!selectMode.value && selectedMovieId.value) {
+    // 선택 모드 종료 후 선택된 영화 저장
+    favoriteMovieId.value = selectedMovieId.value
+    localStorage.setItem('favoriteMovieId', selectedMovieId.value)
+    counterStore.setFavoriteMovie(selectedMovieId.value)  // 좋아요 영화 저장 함수
   }
 }
 
@@ -97,14 +112,10 @@ const toggleSelectMode = () => {
 const selectMovie = (movie) => {
   if (selectMode.value) {
     selectedMovieId.value = movie.id
-    // 최애 영화로 선택된 영화 ID를 로컬 스토리지에 저장
-    localStorage.setItem('favoriteMovieId', movie.id)
-    favoriteMovieId.value = movie.id  // 반영 후 업데이트
-    counterStore.setFavoriteMovie(movie.id)  // store에 최애 영화 설정
   }
 }
 
-// 선택된 영화 확인 여부
+// 선택된 영화 확인
 const isSelected = (movieId) => selectedMovieId.value === movieId
 
 // 디테일 페이지로 이동
@@ -112,9 +123,8 @@ const goToDetail = (movie) => {
   router.push(`/detail/${movie.id}`)
 }
 
-// 로컬 스토리지에서 최애영화 ID가 변경될 때마다 반응형으로 반영
+// 로컬 스토리지 동기화
 watchEffect(() => {
-  // 로컬 스토리지의 favoriteMovieId가 변경될 때마다 반영하도록 처리
   if (favoriteMovieId.value) {
     localStorage.setItem('favoriteMovieId', favoriteMovieId.value)
   }
@@ -122,7 +132,6 @@ watchEffect(() => {
 </script>
 
 <style scoped>
-/* 스타일은 기존과 동일 */
 .profile-container {
   display: flex;
   justify-content: space-between;
@@ -149,6 +158,13 @@ watchEffect(() => {
   box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
 }
 
+.no-favorite-movie {
+  font-size: 18px;
+  color: #b8b8b8;
+  text-align: center;
+  margin-top: 50px;
+}
+
 .select-favorite-button {
   padding: 7px 13px;
   background-color: #634086;
@@ -156,7 +172,7 @@ watchEffect(() => {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  margin-top: 10px; /* 추가된 마진으로 버튼을 영화 리스트 아래에 위치시킴 */
+  margin-top: 10px;
 }
 
 .select-favorite-button:hover {
@@ -172,17 +188,17 @@ watchEffect(() => {
 .movies-list {
   display: flex;
   gap: 20px;
-  overflow-x: auto; /* 가로 스크롤 활성화 */
-  white-space: nowrap; /* 한 줄로 유지 */
-  width: 100%; /* 부모 너비에 맞추기 */
-  min-width: 100%; /* 최소 너비 100% */
+  overflow-x: auto;
+  white-space: nowrap;
+  width: 100%;
+  min-width: 100%;
 }
 
 .movie-item {
   width: 150px;
   text-align: center;
   position: relative;
-  flex-shrink: 0; /* 아이템이 줄어들지 않도록 설정 */
+  flex-shrink: 0;
 }
 
 .movie-poster {
@@ -195,11 +211,11 @@ watchEffect(() => {
 }
 
 .movie-item.selected .movie-poster {
-  opacity: 0.5; /* 선택된 영화는 반투명 */
+  opacity: 0.5;
 }
 
 .movie-item.selectable:hover .movie-poster {
-  opacity: 0.7; /* 선택 가능한 상태에서 마우스 오버 */
+  opacity: 0.7;
 }
 
 .checkmark {
@@ -218,14 +234,6 @@ watchEffect(() => {
   font-size: 16px;
   margin-top: 10px;
   color: #ece8e8;
-  word-break: keep-all;
-  white-space: normal;
-}
-
-.movie-title-2 {
-  font-size: 40px;
-  margin-top: 10px;
-  color: #ece8e8;
 }
 
 .no-posts, .no-comments {
@@ -233,20 +241,5 @@ watchEffect(() => {
   color: #b8b8b8;
   text-align: center;
   padding: 20px;
-}
-
-/* 커스터마이징된 스크롤바 */
-.movies-list::-webkit-scrollbar {
-  height: 10px; /* 스크롤바의 높이 */
-}
-
-.movies-list::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.3); /* 스크롤바의 색상 */
-  width: 8px;
-  border-radius: 0%;
-}
-
-.movies-list::-webkit-scrollbar-track {
-  background-color: rgba(0, 0, 0, 0.1); /* 스크롤바의 트랙 색상 */
 }
 </style>

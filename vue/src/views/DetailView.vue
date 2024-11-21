@@ -190,15 +190,6 @@ const toggleLike = () => {
     counterStore.addLikedMovie(movie.value.id)
   }
 }
-
-// 마우스 hover 시 스크롤바 표시
-const handleMouseEnter = () => {
-  isHovered.value = true
-}
-
-const handleMouseLeave = () => {
-  isHovered.value = false
-}
 </script>
 
 <style scoped>
@@ -276,7 +267,7 @@ const handleMouseLeave = () => {
 
 .detail__title {
   font-size: 36px;
-  max-width: 700px;
+  max-width: 90%;
   font-weight: bold;
   color: #ece8e8;
   margin-bottom: 0px;
@@ -302,7 +293,7 @@ const handleMouseLeave = () => {
 
 .detail__overview {
   height: 175px;
-  width: 75%;
+  width: 90%;
   font-size: 18px;
   color: #ece8e8;
   line-height: 2.0;

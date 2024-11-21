@@ -15,6 +15,7 @@
           
           <!-- 로그인된 경우 Logout 텍스트 보이기, 버튼 대신 클릭 이벤트로 로그아웃 -->
           <router-link v-if="isLoggedIn" to="/profile" class="Profile">Profile</router-link>
+          <router-link v-if="isLoggedIn" to="/search" class="Search">Search</router-link>
           <button v-if="isLoggedIn" @click="logOut" class="Logout">Logout</button>
         </div>
       </div>
@@ -91,7 +92,7 @@ const logOut = () => {
   cursor: pointer;
 }
 
-.Home, .SignUp, .Login, .Logout, .Profile {
+.Home, .SignUp, .Login, .Logout, .Profile, .Search {
   font-size: 18px;
   text-decoration: none;
   color: white;
