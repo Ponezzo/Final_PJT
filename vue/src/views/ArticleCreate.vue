@@ -95,35 +95,52 @@ import axios from '../axios'; // axios 인스턴스
 
 const createPost = async () => {
   if (!selectedMovie.value) {
-    alert('영화를 선택해주세요!')
-    return
+    alert('영화를 선택해주세요!');
+    return;
   }
 
-  const token = localStorage.getItem('authToken');  // 저장된 토큰 가져오기
+  const token = localStorage.getItem('userToken');  // 저장된 토큰 가져오기
 
   if (!token) {
     alert('로그인 후 게시글을 작성할 수 있습니다.');
     return;
   }
 
+  // 포스터 URL을 완전한 URL로 변환
+  const moviePosterUrl = 'https://image.tmdb.org/t/p/w200' + selectedMovie.value.poster_path;
+
   try {
-    const response = await axios.post('posts/', {
+    const response = await axios.post('http://localhost:8000/api/posts/', {
       title: title.value,
       content: content.value,
       movie_title: selectedMovie.value.title,
-      movie_poster: selectedMovie.value.poster_path,
+      movie_poster: moviePosterUrl,  // 완전한 URL로 전달
     }, {
       headers: {
         Authorization: `Token ${token}`,  // 인증 토큰을 헤더에 추가
       },
     });
+
     alert('게시글이 성공적으로 작성되었습니다.');
-    router.push('/community');
+    router.push('/community');  // 게시글 작성 후 커뮤니티 페이지로 이동
   } catch (error) {
     console.error('게시글 작성 중 오류 발생:', error);
-    alert('게시글 작성에 실패했습니다.');
+
+    if (error.response) {
+      // 서버 응답 오류 메시지 출력
+      console.error('서버 응답 오류:', error.response.data);
+      alert(`게시글 작성에 실패했습니다: ${error.response.data}`);
+    } else if (error.request) {
+      console.error('서버 요청 오류:', error.request);
+      alert('서버에 요청을 보낼 수 없습니다.');
+    } else {
+      console.error('오류 발생:', error.message);
+      alert('게시글 작성에 실패했습니다.');
+    }
   }
-}
+};
+
+
 
 
 </script>

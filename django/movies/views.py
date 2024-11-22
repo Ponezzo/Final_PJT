@@ -72,9 +72,10 @@ def post_list(request):
 
     elif request.method == 'POST':
         serializer = PostSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({"error": "Invalid data"}, status=status.HTTP_400_BAD_REQUEST)  # 예외가 발생할 경우 오류 메시지 반환
 
 # 게시글 상세 조회
 @api_view(['GET'])
