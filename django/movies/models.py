@@ -38,6 +38,8 @@ class Post(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    movie_title = models.CharField(max_length=100, blank=True, null=True)
+    movie_poster = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return self.title

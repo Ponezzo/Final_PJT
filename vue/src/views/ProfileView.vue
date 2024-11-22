@@ -2,11 +2,9 @@
   <div class="profile-container">
     <div class="left-section">
       <div class="favorite-movie">
-        <!-- 좋아요 리스트가 비어있거나 최애 영화가 없을 경우 -->
         <template v-if="!favoriteMovie || likedMovies.length === 0">
           <p class="no-favorite-movie">최애 영화를 선택해주세요.</p>
         </template>
-        <!-- 최애 영화가 있을 경우 -->
         <template v-else>
           <h2 class="section-title"></h2>
           <img 
@@ -20,7 +18,10 @@
     <div class="right-section">
       <div class="liked-movies">
         <h2 class="section-title">💜</h2>
-        <div class="movies-list">
+        <div 
+          class="movies-list" 
+          @wheel="onWheel"
+        >
           <div 
             v-for="movie in likedMovies" 
             :key="movie.id" 
@@ -29,8 +30,15 @@
             @click="selectMode ? selectMovie(movie) : goToDetail(movie)"
           >
             <img 
-              :src="'https://image.tmdb.org/t/p/original' + movie.poster_path" 
+              v-if="movie.poster_path" 
+              :src="'https://image.tmdb.org/t/p/w500' + movie.poster_path" 
               :alt="movie.title + ' Poster'" 
+              class="movie-poster" 
+            />
+            <img 
+              v-else 
+              src="https://via.placeholder.com/500x750?text=No+Image" 
+              alt="No Image Available" 
               class="movie-poster" 
             />
             <p class="movie-title">{{ movie.title }}</p>
@@ -56,9 +64,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, watch } from 'vue'
+import { ref, computed, watchEffect, watch, onMounted } from 'vue'
 import { useCounterStore } from '@/stores/counter'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 const counterStore = useCounterStore()
 const router = useRouter()
@@ -66,32 +75,39 @@ const router = useRouter()
 const selectMode = ref(false)
 const selectedMovieId = ref(null)
 
-// 좋아요한 영화 목록 계산
-const likedMovies = computed(() => {
-  // 좋아요 리스트에 포함된 영화들만 필터링
-  return counterStore.movies.filter(movie => counterStore.likedMovies.includes(movie.id))
-})
+const likedMovies = computed(() => counterStore.likedMovies);
+
+// TMDB API 키
+const apiKey = import.meta.env.VITE_TMDB_API_KEY;  // 환경 변수로 API 키 가져오기
 
 // 로컬 스토리지에 저장된 최애 영화 ID 가져오기
 const favoriteMovieId = ref(localStorage.getItem('favoriteMovieId'))
 
 // 최애 영화 계산
 const favoriteMovie = computed(() => {
-  // 좋아요 리스트가 비어 있거나, 최애 영화가 좋아요 리스트에 포함되지 않으면 null 반환
   if (
     likedMovies.value.length === 0 ||
     !likedMovies.value.some(movie => movie.id === parseInt(favoriteMovieId.value))
   ) {
     return null
   }
-  return counterStore.movies.find(movie => movie.id === parseInt(favoriteMovieId.value))
+  return likedMovies.value.find(movie => movie.id === parseInt(favoriteMovieId.value))
 })
+
+// TMDB에서 영화 정보 가져오기
+const fetchMovieDetails = async () => {
+  const moviePromises = likedMovies.value.map(async (movieId) => {
+    const response = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}&language=ko-KR`)
+    return response.data
+  })
+
+  counterStore.movies = await Promise.all(moviePromises)
+}
 
 // 좋아요 리스트 변화 감지
 watch(likedMovies, (newLikedMovies) => {
-  console.log('Liked Movies Updated:', newLikedMovies) // 좋아요 리스트 상태 출력
+  console.log('Liked Movies Updated:', newLikedMovies)
   if (newLikedMovies.length === 0) {
-    // 좋아요 리스트가 비면 최애 영화 초기화
     favoriteMovieId.value = null
     localStorage.removeItem('favoriteMovieId')
   }
@@ -101,10 +117,9 @@ watch(likedMovies, (newLikedMovies) => {
 const toggleSelectMode = () => {
   selectMode.value = !selectMode.value
   if (!selectMode.value && selectedMovieId.value) {
-    // 선택 모드 종료 후 선택된 영화 저장
     favoriteMovieId.value = selectedMovieId.value
     localStorage.setItem('favoriteMovieId', selectedMovieId.value)
-    counterStore.setFavoriteMovie(selectedMovieId.value)  // 좋아요 영화 저장 함수
+    counterStore.setFavoriteMovie(selectedMovieId.value)
   }
 }
 
@@ -120,7 +135,7 @@ const isSelected = (movieId) => selectedMovieId.value === movieId
 
 // 디테일 페이지로 이동
 const goToDetail = (movie) => {
-  router.push(`/detail/${movie.id}`)
+  router.push(`/search-detail/${movie.id}`)
 }
 
 // 로컬 스토리지 동기화
@@ -129,6 +144,30 @@ watchEffect(() => {
     localStorage.setItem('favoriteMovieId', favoriteMovieId.value)
   }
 })
+
+// 컴포넌트가 마운트될 때 TMDB API에서 영화 정보를 가져옵니다
+onMounted(() => {
+  fetchMovieDetails()
+})
+
+// 부드러운 마우스 휠 가로 스크롤 처리
+let scrollTimeout;
+const onWheel = (event) => {
+  const scrollContainer = event.currentTarget;
+  const deltaX = event.deltaY || event.detail || event.wheelDelta;
+
+  if (scrollTimeout) {
+    clearTimeout(scrollTimeout);
+  }
+
+  // 부드러운 스크롤을 위해 requestAnimationFrame 사용
+  scrollTimeout = setTimeout(() => {
+    scrollContainer.scrollLeft += deltaX * 0.2;  // 스크롤 속도 조절
+  }, 10);
+
+  // 휠 이벤트의 기본 동작 방지 (세로 스크롤 방지)
+  event.preventDefault();
+}
 </script>
 
 <style scoped>
@@ -152,7 +191,7 @@ watchEffect(() => {
 }
 
 .favorite-movie-poster {
-  width: 73%;
+  width: 70%;
   height: auto;
   border-radius: 10px;
   box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
@@ -194,6 +233,11 @@ watchEffect(() => {
   min-width: 100%;
 }
 
+.movies-list::-webkit-scrollbar {
+  height: 8px; /* 슬라이딩바의 높이 */
+}
+
+
 .movie-item {
   width: 150px;
   text-align: center;
@@ -234,6 +278,8 @@ watchEffect(() => {
   font-size: 16px;
   margin-top: 10px;
   color: #ece8e8;
+  word-break: keep-all;
+  white-space: normal;
 }
 
 .no-posts, .no-comments {

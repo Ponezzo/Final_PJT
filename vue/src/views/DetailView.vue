@@ -6,10 +6,6 @@
         alt="Movie Poster" 
         class="detail__image" 
       />
-      <button @click="toggleLike" :class="{'liked': isLiked}" class="like-button">
-        <span v-if="isLiked">❤️</span>
-        <span v-else>🤍</span>
-      </button>
     </div>
     <div class="detail-right">
       <div class="title-container">
@@ -17,7 +13,7 @@
         <p class="detail__genre">#{{ genreNames }} </p> <!-- 장르 추가 -->
       </div>
       <p class="detail__release-date">개봉일 : {{ movie.release_date }}</p>
-      <p class="detail__rating">평점 : {{ movie.vote_average }} / 10.0</p> <!-- 장르 추가 -->
+      <p class="detail__rating">평점 : {{ movie.vote_average.toFixed(1) }} / 10.0</p> <!-- 장르 추가 -->
       <p class="detail__overview">{{ movie.overview }}</p>
 
       <div v-if="trailerUrl" class="media-container">
@@ -68,8 +64,8 @@ const movie = ref({}) // 영화 정보
 const trailerUrl = ref('')
 const cast = ref([]) // 캐스트 정보 저장
 const isHovered = ref(false) // 마우스 hover 상태
-const YOUTUBE_API_KEY = 'AIzaSyDQ240Zo-EUzSX3SN1u27mTkzaet0iRUjI'
-const TMDB_API_KEY = 'b7526ccdb602bef47d4d9a189ce86d82' // TMDb API 키 입력
+const YOUTUBE_API_KEY = 'AIzaSyCfigBXGANP7S3HwM7VjUXfuCYWeKFe-m8'
+const TMDB_API_KEY = 'd61d83be3016df68850ebfd3ba458c8c' // TMDb API 키 입력
 
 // 장르 ID -> 한글 장르 이름 매핑
 const genreMapping = {

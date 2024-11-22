@@ -9,6 +9,10 @@ import ProfileView from '@/views/ProfileView.vue'
 import SearchView from '@/views/SearchView.vue'
 import SearchList from '@/views/SearchList.vue'
 import SearchDetail from '@/views/SearchDetail.vue'
+import Community from '@/views/Community.vue'
+import CommunityDetail from '@/views/CommunityDetail.vue'
+import ArticleCreate from '@/views/ArticleCreate.vue'
+import Recommend from '@/views/Recommend.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -59,6 +63,26 @@ const router = createRouter({
       name: 'SearchDetail', 
       component: SearchDetail,
       props: true
+    },
+    {
+      path: '/community', 
+      name: 'Community', 
+      component: Community,
+    },
+    {
+      path: '/community/:id', 
+      name: 'CommunityDetail', 
+      component: CommunityDetail,
+    },
+    {
+      path: '/article-create', 
+      name: 'ArticleCreate', 
+      component: ArticleCreate,
+    },
+    {
+      path: '/recommend', 
+      name: 'Recommend', 
+      component: Recommend,
     },
   ]
 })

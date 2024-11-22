@@ -51,7 +51,7 @@ const getStyle = (index) => {
   const z = Math.cos(rad) * 450
 
   const scale = hoveredIndex.value === index ? 1.2 : 1
-  const opacity = z > 0 ? 1 : 0.09
+  const opacity = z > 0 ? 1 : 0.6
 
   return {
     transform: `translate3d(${x}px, -50%, ${z}px) rotateY(${angle}deg) scale(${scale})`,
