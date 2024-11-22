@@ -4,6 +4,14 @@ import ArticleView from '@/views/ArticleView.vue'
 import DetailView from '@/views/DetailView.vue'
 import SignUpView from '@/views/SignUpView.vue'
 import LogInView from '@/views/LogInView.vue'
+import LogoutView from '@/views/LogoutView.vue'
+import ProfileView from '@/views/ProfileView.vue'
+import SearchView from '@/views/SearchView.vue'
+import SearchList from '@/views/SearchList.vue'
+import SearchDetail from '@/views/SearchDetail.vue'
+import Community from '@/views/Community.vue'
+import CommunityDetail from '@/views/CommunityDetail.vue'
+import ArticleCreate from '@/views/ArticleCreate.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,18 +24,60 @@ const router = createRouter({
     {
       path: '/detail/:id',
       name: 'DetailView',
-      component: DetailView
+      component: () => import('@/views/DetailView.vue'),
+      props: true
     },
-    // {
-    //   path: '/signup',
-    //   name: 'SignUpView',
-    //   component: SignUpView
-    // },
-    // {
-    //   path: '/login',
-    //   name: 'LogInView',
-    //   component: LogInView
-    // }
+    {
+      path: '/signup',
+      name: 'SignUpView',
+      component: SignUpView
+    },
+    {
+      path: '/login',
+      name: 'LogInView',
+      component: LogInView
+    },
+    {
+      path: '/logout',
+      name: 'LogoutView',
+      component: LogoutView
+    },
+    {
+      path: '/profile',
+      name: 'ProfileView',
+      component: ProfileView
+    },
+    {
+      path: '/search',
+      name: 'SearchView',
+      component: SearchView
+    },
+    {
+      path: '/search-list', 
+      name: 'SearchList', 
+      component: SearchList
+    },
+    {
+      path: '/search-detail/:id', 
+      name: 'SearchDetail', 
+      component: SearchDetail,
+      props: true
+    },
+    {
+      path: '/community', 
+      name: 'Community', 
+      component: Community,
+    },
+    {
+      path: '/community/:id', 
+      name: 'CommunityDetail', 
+      component: CommunityDetail,
+    },
+    {
+      path: '/article-create', 
+      name: 'ArticleCreate', 
+      component: ArticleCreate,
+    },
   ]
 })
 
@@ -35,12 +85,6 @@ const router = createRouter({
 router.beforeEach((to, from) => {
   const store = useCounterStore()
   
-  // 로그인하지 않은 상태에서 메인 페이지에 접근하려는 경우
-  if (to.name === 'ArticleView' && !store.isLogin) {
-    window.alert('로그인이 필요합니다.')
-    return { name: 'LogInView' } // 로그인 페이지로 리다이렉트
-  }
-
   // 로그인한 상태에서 회원가입 또는 로그인 페이지에 접근하려는 경우
   if ((to.name === 'SignUpView' || to.name === 'LogInView') && store.isLogin) {
     window.alert('이미 로그인이 되어있습니다.')
