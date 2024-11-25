@@ -4,7 +4,6 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from django.shortcuts import get_object_or_404, get_list_or_404
-from django.views.decorators.csrf import csrf_exempt
 
 from .serializers import MovieListSerializer, MovieSerializer, RecommendationSerializer, ReviewSerializer, PostSerializer, CommentSerializer
 from .models import Movie, Recommendation, Review, Post, Comment
@@ -63,9 +62,8 @@ def movie_reviews(request, movie_pk):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # 게시글 목록 조회 및 생성
-@csrf_exempt
 @api_view(['GET', 'POST'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def post_list(request):
     if request.method == 'GET':
         posts = get_list_or_404(Post)
@@ -74,9 +72,10 @@ def post_list(request):
 
     elif request.method == 'POST':
         serializer = PostSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({"error": "Invalid data"}, status=status.HTTP_400_BAD_REQUEST)  # 예외가 발생할 경우 오류 메시지 반환
 
 # 게시글 상세 조회
 @api_view(['GET'])

@@ -52,6 +52,7 @@ const logIn = () => {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  background: transparent;
   background-size: cover;
   background-position: center;
   
@@ -59,7 +60,7 @@ const logIn = () => {
 
 /* 로그인 박스 스타일 */
 .login-box {
-  background: rgba(255, 255, 255, 0.2); /* 투명 배경 */
+  background: rgba(255, 255, 255, 0.8); /* 투명 배경 */
   padding: 40px;
   border-radius: 8px;
   width: 100%;

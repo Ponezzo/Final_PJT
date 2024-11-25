@@ -14,19 +14,20 @@
           <router-link v-if="!isLoggedIn" to="/login" class="Login">Login</router-link>
           
           <!-- 로그인된 경우 Logout 텍스트 보이기, 버튼 대신 클릭 이벤트로 로그아웃 -->
-          <router-link v-if="isLoggedIn" to="/profile" class="Profile">Profile</router-link>
           <router-link v-if="isLoggedIn" to="/community" class="Community">Community</router-link>
+          <router-link v-if="isLoggedIn" to="/profile" class="Profile">Profile</router-link>
           <router-link v-if="isLoggedIn" to="/search" class="Search">Search</router-link>
-          <router-link v-if="isLoggedIn" to="/recommend" class="Recommend">How about...</router-link>
           <button v-if="isLoggedIn" @click="logOut" class="Logout">Logout</button>
         </div>
       </div>
     </header>
 
     <!-- Fade-in/Fade-out 애니메이션 추가 -->
-    <transition name="fade" mode="out-in">
-      <router-view />
-    </transition>
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
@@ -49,14 +50,14 @@ const isLoggedIn = computed(() => store.isLogin)
 // 로그아웃 함수
 const logOut = () => {
   store.logOut()  // Pinia store에서 로그아웃 처리
-  router.push('/login')  // 로그아웃 후 로그인 페이지로 이동
+  router.push('/')  // 로그아웃 후 로그인 페이지로 리다이렉트
 }
 </script>
 
 <style scoped>
 /* Fade-in/Fade-out 효과 */
 .fade-enter-active, .fade-leave-active {
-  transition: opacity 1s ease; /* 전환 속도 조절 */
+  transition: opacity 0.3s ease; /* 전환 속도 조절 */
 }
 
 .fade-enter-from, .fade-leave-to {
@@ -94,7 +95,7 @@ const logOut = () => {
   cursor: pointer;
 }
 
-.Home, .SignUp, .Login, .Logout, .Profile, .Search, .Community, .Recommend {
+.Home, .SignUp, .Login, .Logout, .Profile, .Search, .Community {
   font-size: 18px;
   text-decoration: none;
   color: white;

@@ -1,6 +1,6 @@
 <template>
   <div class="community-page">
-    <h1>영화 리뷰 커뮤니티</h1>
+    <h1 class="title"></h1>
 
     <!-- 로딩 상태 처리 -->
     <div v-if="loading">로딩 중...</div>
@@ -15,12 +15,12 @@
         @click="goToDetail(post.id)"
       >
         <img 
-          :src="post.moviePoster ? 'https://image.tmdb.org/t/p/w500' + post.moviePoster : '/default-image.jpg'" 
+          :src="post.movie_poster" 
           alt="Movie Poster" 
           class="movie-poster"
         />
         <div class="post-content">
-          <h3>{{ post.movieTitle || '영화 제목 없음' }}</h3>
+          <h3>{{ post.title || '영화 제목 없음' }}</h3>
           <p>{{ post.content || '내용이 없습니다.' }}</p>
         </div>
       </div>
@@ -33,6 +33,7 @@
     <button @click="goToCreatePost" class="create-post-button">게시글 작성하기</button>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -53,10 +54,10 @@ const goToCreatePost = () => {
 }
 
 onMounted(async () => {
-  const token = localStorage.getItem('authToken');  // 로컬스토리지에서 토큰 가져오기
+  const token = localStorage.getItem('userToken');  // 로컬스토리지에서 토큰 가져오기
 
   try {
-    const response = await axios.get('/api/posts/', {
+    const response = await axios.get('http://localhost:8000/api/posts/', {
       headers: {
         Authorization: `Token ${token}`,  // 토큰을 헤더에 추가
       },
@@ -78,6 +79,11 @@ onMounted(async () => {
 .community-page {
   text-align: center;
   padding: 20px;
+  height: 100vh;
+}
+
+.title {
+  color: #f5f5f5;
 }
 
 .posts-list {
@@ -100,7 +106,7 @@ onMounted(async () => {
 }
 
 .movie-poster {
-  width: 100%;
+  width: 90%;
   height: auto;
   border-radius: 10px;
 }
@@ -108,14 +114,23 @@ onMounted(async () => {
 .create-post-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #634086;
-  color: white;
+  background-color: #f5f5f5;
+  color: black;
   border-radius: 5px;
   margin-top: 20px;
   text-decoration: none;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;  /* 텍스트를 굵게 설정 */
+  font-family: 'GowunBatang-Regular';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunBatang-Regular.woff') format('woff');
+  font-stretch: semi-expanded;
+  font-style: normal;
 }
 
+
+
 .create-post-button:hover {
-  background-color: #8253b1;
+  background-color: #d1d1d1;
 }
 </style>

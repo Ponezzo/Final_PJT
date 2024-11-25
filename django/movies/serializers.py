@@ -22,17 +22,19 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ('id', 'user', 'movie', 'rating', 'content', 'created_at', 'updated_at')
 
-class PostSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
-    comments = serializers.StringRelatedField(many=True)
-
-    class Meta:
-        model = Post
-        fields = ('id', 'user', 'title', 'content', 'movie_title', 'movie_poster', 'created_at', 'updated_at', 'comments')
-
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
 
     class Meta:
         model = Comment
         fields = ('id', 'user', 'content', 'created_at')
+
+class PostSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+    comments = CommentSerializer(many=True, read_only=True)  # 댓글을 실제 시리얼라이저로 처리
+
+    class Meta:
+        model = Post
+        fields = ('id', 'user', 'title', 'content', 'movie_title', 'movie_poster', 'created_at', 'updated_at', 'comments')  # 'comments' 필드를 'fields'에 추가
+
+
