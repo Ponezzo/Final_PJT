@@ -5,7 +5,7 @@
       @input="onSearch" 
       type="text" 
       class="search-input" 
-      placeholder="How about..."
+      placeholder=""
       @focus="isFocused = true"
       @blur="isFocused = false"
       @keyup.enter="onEnter"

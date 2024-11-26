@@ -1,7 +1,7 @@
 <template>
   <div class="signup-container">
     <div class="signup-box">
-      <h1>MovieCINE</h1>
+      <h1>CINEMovie</h1>
       <form @submit.prevent="signUp">
         <div class="input-group">
           <label for="username">아이디</label>
@@ -68,7 +68,7 @@ const signUp = () => {
 
 /* 회원가입 박스 스타일 */
 .signup-box {
-  background: rgba(255, 255, 255, 0.8); /* 투명 배경 */
+  background: rgba(0, 0, 0, 0.4); /* 투명 배경 */
   padding: 40px;
   border-radius: 8px;
   width: 100%;
@@ -79,7 +79,7 @@ const signUp = () => {
 
 /* 제목 스타일 */
 h1 {
-  color: #3d1635;
+  color: whitesmoke;
   font-size: 28px;
   margin-bottom: 20px;
   font-family: 'GowunBatang-Regular', sans-serif; /* 제목에 폰트 적용 */
@@ -93,7 +93,7 @@ h1 {
 
 .input-group label {
   font-size: 18px;
-  color: #3d1635;
+  color: whitesmoke;
   margin-bottom: 5px;
   display: block;
 }
@@ -101,39 +101,44 @@ h1 {
 .input-group input {
   width: 100%;
   padding: 10px;
-  border: 1px solid #b8235a;
+  border: 1px solid grey;
   border-radius: 5px;
   font-size: 16px;
   background-color: #f8f8f8;
-  color: #3d1635;
+  color: black;
   transition: all 0.3s ease;
 }
 
 .input-group input:focus {
-  border-color: #e7627d;
+  border-color: grey;
   background-color: #fff;
   outline: none;
 }
 
 /* 회원가입 버튼 스타일 */
 .signup-btn {
-  width: 100%;
+  width: 80%;
   padding: 12px;
-  background-color: #e7627d;
-  color: white;
+  background-color:whitesmoke;
+  color: black;
   border: none;
   border-radius: 5px;
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-family: 'GowunBatang-Regular';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunBatang-Regular.woff') format('woff');
+  font-weight: normal;
+  font-stretch: semi-expanded;
+  font-style: bold;
 }
 
 .signup-btn:hover {
-  background-color: #b8235a;
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .signup-btn:active {
-  background-color: #801357;
+  background-color: grey;
 }
 
 /* 반응형 디자인 */

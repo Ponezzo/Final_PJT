@@ -109,7 +109,7 @@ const isLiked = computed(() => {
 const trailerKey = ref('');
 
 const fetchMovieDetail = async () => {
-  const TMDB_API_KEY = 'bbb257be40e0371adce34ae19dfba804';
+  const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
   try {
     const [movieResponse, creditsResponse, videosResponse] = await Promise.all([
       fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}&language=ko-KR`),

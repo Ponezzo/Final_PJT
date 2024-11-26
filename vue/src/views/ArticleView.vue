@@ -29,6 +29,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const counterStore = useCounterStore()
 const movies = ref([])
+
 const rotationAngle = ref(0)
 const hoveredIndex = ref(null)
 const isNavigating = ref(false)
@@ -80,13 +81,12 @@ const onMouseLeave = () => {
 </script>
 
 <style scoped>
-/* 스타일은 그대로 유지 */
 .carousel-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  perspective: 2200px;
+  perspective: 2400px;
   overflow: hidden;
 }
 
@@ -115,6 +115,12 @@ const onMouseLeave = () => {
   height: 100%;
   border-radius: 10px;
   box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+  transition: filter 0.5s ease-in-out;
+  filter: grayscale(100%); /* 처음에는 흑백으로 설정 */
+}
+
+.carousel__item:hover .carousel__image {
+  filter: grayscale(0%); /* hover 시 원래 색상으로 돌아옴 */
 }
 
 .carousel__number {

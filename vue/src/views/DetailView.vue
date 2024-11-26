@@ -73,8 +73,8 @@ const trailerUrl = ref('')
 const cast = ref([]) // 캐스트 정보 저장
 const isHovered = ref(false) // 마우스 hover 상태
 const userToken = localStorage.getItem('userToken') // 로컬스토리지에서 userToken 가져오기
-const YOUTUBE_API_KEY = 'AIzaSyCfigBXGANP7S3HwM7VjUXfuCYWeKFe-m8'
-const TMDB_API_KEY = 'bbb257be40e0371adce34ae19dfba804' // TMDb API 키 입력
+const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 const genreMapping = {
   28: '액션', 12: '모험', 16: '애니메이션', 35: '코미디', 80: '범죄', 99: '다큐멘터리',
   18: '드라마', 10751: '가족', 14: '판타지', 36: '역사', 27: '공포', 10402: '뮤지컬',

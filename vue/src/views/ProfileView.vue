@@ -48,30 +48,48 @@
         <button @click="toggleSelectMode" class="select-favorite-button">
           {{ selectMode ? '선택 완료' : '최애영화 선택하기' }}
         </button>
+        <button @click="fetchRecommendMovies" class="recommend-button">
+          추천 받기
+        </button>
       </div>
 
       <div class="my-posts">
-        <h2 class="section-title">추천 영화</h2>
-        <!-- <div v-if="posts.length === 0" class="no-posts">게시글이 없습니다.</div> -->
-        <ul >
-          <li v-for="post in posts.value" :key="post.id">
-            <h3>{{ post.title }}</h3>
-            <p>{{ post.content }}</p>
-            <p><small>{{ post.created_at }}</small></p>
-          </li>
-        </ul>
+        <h2 class="section-title">Recommend</h2>
+        <div class="movies-list">
+          <div 
+            v-for="movie in recommendMovies" 
+            :key="movie.id" 
+            class="movie-item"
+            @click="goToDetail(movie)"
+          >
+            <img 
+              v-if="movie.poster_path" 
+              :src="'https://image.tmdb.org/t/p/w500' + movie.poster_path" 
+              :alt="movie.title + ' Poster'" 
+              class="movie-poster" 
+            />
+            <img 
+              v-else 
+              src="https://via.placeholder.com/500x750?text=No+Image" 
+              alt="No Image Available" 
+              class="movie-poster" 
+            />
+            <p class="movie-title">{{ movie.title }}</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
+
 <script setup>
-import { ref, computed, watchEffect, watch, onMounted } from 'vue'
+import { ref, computed, watch, watchEffect, onMounted } from 'vue'
 import { useCounterStore } from '@/stores/counter'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
-const posts = ref([]);
+const recommendMovies = ref([]); // 추천 영화를 위한 ref
 
 const counterStore = useCounterStore()
 const router = useRouter()
@@ -80,6 +98,39 @@ const selectMode = ref(false)
 const selectedMovieId = ref(null)
 
 const likedMovies = computed(() => counterStore.likedMovies);
+
+let isScrolling = false; // 스크롤 중복 방지 플래그
+
+const smoothScroll = (element, delta, duration = 450) => {
+  if (isScrolling) return; // 이미 스크롤 중이면 중단
+  isScrolling = true;
+
+  const startTime = performance.now();
+  const startScrollLeft = element.scrollLeft;
+
+  const animate = (currentTime) => {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1); // 진행률 계산 (0~1)
+    const ease = progress * (2 - progress); // ease-out 효과
+
+    element.scrollLeft = startScrollLeft + delta * ease; // 스크롤 위치 계산
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      isScrolling = false; // 애니메이션 완료 후 스크롤 가능
+    }
+  };
+
+  requestAnimationFrame(animate);
+};
+
+const onWheel = (event) => {
+  event.preventDefault(); // 기본 스크롤 방지
+  const moviesList = event.currentTarget;
+  smoothScroll(moviesList, event.deltaY); // 부드럽게 스크롤
+};
+
 
 // TMDB API 키
 const apiKey = import.meta.env.VITE_TMDB_API_KEY;  // 환경 변수로 API 키 가져오기
@@ -107,6 +158,35 @@ const fetchMovieDetails = async () => {
 
   counterStore.movies = await Promise.all(moviePromises)
 }
+
+// 추천 영화 가져오기
+const fetchRecommendMovies = async () => {
+  if (favoriteMovie.value) {
+    const genreIds = favoriteMovie.value.genres.slice(0, 2).map(genre => genre.id); // 최애 영화의 앞 2개의 장르 추출
+    const genreString = genreIds.join(',');
+    const randomPage = Math.floor(Math.random() * 5) + 1;
+    const url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreString}&sort_by=popularity.desc&language=ko-KR&page=${randomPage}`;
+    try {
+      const response = await axios.get(url);
+      const allMovies = response.data.results; // 인기순으로 정렬된 영화들
+      const randomMovies = getRandomMovies(allMovies, 6); // 6개를 랜덤으로 선택
+      recommendMovies.value = randomMovies;
+    } catch (error) {
+      console.error('추천 영화 가져오기 오류:', error);
+    }
+  }
+}
+
+// 주어진 영화 배열에서 n개의 랜덤 영화 선택
+const getRandomMovies = (movies, n) => {
+  const shuffled = [...movies]; // 배열 복사
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1)); // 0부터 i까지 랜덤 인덱스
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // 값 교환
+  }
+  return shuffled.slice(0, n); // 앞 6개 요소 반환
+}
+
 
 // 좋아요 리스트 변화 감지
 watch(likedMovies, (newLikedMovies) => {
@@ -153,26 +233,14 @@ watchEffect(() => {
 onMounted(() => {
   fetchMovieDetails()
 })
-
-// 부드러운 마우스 휠 가로 스크롤 처리
-let scrollTimeout;
-const onWheel = (event) => {
-  const scrollContainer = event.currentTarget;
-  const deltaX = event.deltaY || event.detail || event.wheelDelta;
-
-  if (scrollTimeout) {
-    clearTimeout(scrollTimeout);
-  }
-
-  // 부드러운 스크롤을 위해 requestAnimationFrame 사용
-  scrollTimeout = setTimeout(() => {
-    scrollContainer.scrollLeft += deltaX * 0.2;  // 스크롤 속도 조절
-  }, 10);
-
-  // 휠 이벤트의 기본 동작 방지 (세로 스크롤 방지)
-  event.preventDefault();
-}
 </script>
+
+
+<style scoped>
+/* 스타일은 그대로 유지 */
+</style>
+
+
 
 <style scoped>
 .profile-container {
@@ -195,7 +263,7 @@ const onWheel = (event) => {
 }
 
 .favorite-movie-poster {
-  width: 70%;
+  width: 68%;
   height: auto;
   border-radius: 10px;
   box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
@@ -222,12 +290,28 @@ const onWheel = (event) => {
   background-color: #d3d3d3;
 }
 
+.recommend-button {
+  padding: 7px 13px;
+  background-color: #f5f5f5;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.recommend-button:hover {
+  background-color: #d3d3d3;
+}
+
 .section-heart {
   font-size: 50px;
   font-weight: bold;
   margin-bottom: 10px;
   color: #ebedee;
 }
+
 .section-title {
   font-size: 30px;
   font-weight: bold;
@@ -245,9 +329,8 @@ const onWheel = (event) => {
 }
 
 .movies-list::-webkit-scrollbar {
-  height: 8px; /* 슬라이딩바의 높이 */
+  height: 8px;
 }
-
 
 .movie-item {
   width: 150px;
@@ -293,10 +376,14 @@ const onWheel = (event) => {
   white-space: normal;
 }
 
-.no-posts, .no-comments {
-  font-size: 16px;
-  color: #b8b8b8;
-  text-align: center;
-  padding: 20px;
+.my-posts {
+  margin-top: 30px;
+}
+
+.my-posts h2 {
+  font-size: 30px;
+  font-weight: bold;
+  color: #ebedee;
+  margin-bottom: 20px;
 }
 </style>

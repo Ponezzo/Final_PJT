@@ -49,7 +49,8 @@ const searchQuery = route.query.query
 const movies = ref([]) // 검색된 영화 목록
 const relatedMovies = ref([]) // 장르가 일치하는 관련 영화 목록
 const movieGenres = ref([]) // 첫 번째 영화의 장르
-const TMDB_API_KEY = 'bbb257be40e0371adce34ae19dfba804'
+const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY
+
 
 // 영화 검색 API
 const fetchMovies = async (query) => {

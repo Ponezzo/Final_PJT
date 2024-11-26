@@ -81,6 +81,7 @@ const searchResults = ref([]);
 const selectedMovie = ref(null);
 const showModal = ref(false);
 const router = useRouter();
+const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 const openMovieModal = () => {
   showModal.value = true;
@@ -99,7 +100,7 @@ const searchMovies = async () => {
   try {
     const response = await axios.get(`https://api.themoviedb.org/3/search/movie`, {
       params: {
-        api_key: 'bbb257be40e0371adce34ae19dfba804', // TMDB API 키
+        api_key: TMDB_API_KEY,
         query: searchQuery.value,
         language: 'ko'
       },
@@ -196,8 +197,8 @@ const createPost = async () => {
 .movie-select-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #f5f5f5;
-  color: black;
+  background-color:transparent;
+  color: whitesmoke;
   border-radius: 5px;
   margin-top: 20px;
   text-decoration: none;
@@ -208,10 +209,6 @@ const createPost = async () => {
   src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunBatang-Regular.woff') format('woff');
   font-stretch: semi-expanded;
   font-style: normal;
-}
-
-.movie-select-button:hover {
-  background-color: #d3d3d3;
 }
 
 .selected-movie img {
@@ -311,8 +308,8 @@ textarea::-webkit-scrollbar-thumb {
 .submit-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #f5f5f5;
-  color: black;
+  background-color: transparent;
+  color: whitesmoke;
   border-radius: 5px;
   margin-top: 20px;
   text-decoration: none;
@@ -323,10 +320,6 @@ textarea::-webkit-scrollbar-thumb {
   src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunBatang-Regular.woff') format('woff');
   font-stretch: semi-expanded;
   font-style: normal;
-}
-
-.submit-button:hover {
-  background-color: #d3d3d3;
 }
 
 .modalsearch {
