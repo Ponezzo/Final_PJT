@@ -17,7 +17,7 @@
     </div>
     <div class="right-section">
       <div class="liked-movies">
-        <h2 class="section-title">💜</h2>
+        <h2 class="section-heart">❤</h2>
         <div 
           class="movies-list" 
           @wheel="onWheel"
@@ -51,13 +51,15 @@
       </div>
 
       <div class="my-posts">
-        <h2 class="section-title">내가 쓴 게시글</h2>
-        <p class="no-posts">게시글이 없습니다.</p>
-      </div>
-
-      <div class="my-comments">
-        <h2 class="section-title">내가 쓴 댓글</h2>
-        <p class="no-comments">댓글이 없습니다.</p>
+        <h2 class="section-title">추천 영화</h2>
+        <!-- <div v-if="posts.length === 0" class="no-posts">게시글이 없습니다.</div> -->
+        <ul >
+          <li v-for="post in posts.value" :key="post.id">
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.content }}</p>
+            <p><small>{{ post.created_at }}</small></p>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -68,6 +70,8 @@ import { ref, computed, watchEffect, watch, onMounted } from 'vue'
 import { useCounterStore } from '@/stores/counter'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+
+const posts = ref([]);
 
 const counterStore = useCounterStore()
 const router = useRouter()
@@ -206,8 +210,8 @@ const onWheel = (event) => {
 
 .select-favorite-button {
   padding: 7px 13px;
-  background-color: #634086;
-  color: white;
+  background-color: #f5f5f5;
+  color: black;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -215,13 +219,20 @@ const onWheel = (event) => {
 }
 
 .select-favorite-button:hover {
-  background-color: #8253b1;
+  background-color: #d3d3d3;
 }
 
-.section-title {
-  font-size: 28px;
+.section-heart {
+  font-size: 50px;
   font-weight: bold;
   margin-bottom: 10px;
+  color: #ebedee;
+}
+.section-title {
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #ebedee;
 }
 
 .movies-list {

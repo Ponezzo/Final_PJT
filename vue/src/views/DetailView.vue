@@ -48,6 +48,12 @@
           </div>
         </div>
       </div>
+
+      <!-- 수정 및 삭제 버튼 -->
+      <div v-if="canEdit" class="edit-buttons">
+        <button @click="editPost" class="edit-button">수정</button>
+        <button @click="deletePost" class="delete-button">삭제</button>
+      </div>
     </div>
   </div>
   <div v-else class="loading">Loading movie details...</div>
@@ -55,50 +61,35 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useCounterStore } from '@/stores/counter'
+import axios from '../axios' // axios 인스턴스
 
 const route = useRoute()
+const router = useRouter()
 const counterStore = useCounterStore()
 const movie = ref({}) // 영화 정보
 const trailerUrl = ref('')
 const cast = ref([]) // 캐스트 정보 저장
 const isHovered = ref(false) // 마우스 hover 상태
+const userToken = localStorage.getItem('userToken') // 로컬스토리지에서 userToken 가져오기
 const YOUTUBE_API_KEY = 'AIzaSyCfigBXGANP7S3HwM7VjUXfuCYWeKFe-m8'
-const TMDB_API_KEY = 'd61d83be3016df68850ebfd3ba458c8c' // TMDb API 키 입력
-
-// 장르 ID -> 한글 장르 이름 매핑
+const TMDB_API_KEY = 'bbb257be40e0371adce34ae19dfba804' // TMDb API 키 입력
 const genreMapping = {
-  28: '액션',
-  12: '모험',
-  16: '애니메이션',
-  35: '코미디',
-  80: '범죄',
-  99: '다큐멘터리',
-  18: '드라마',
-  10751: '가족',
-  14: '판타지',
-  36: '역사',
-  27: '공포',
-  10402: '뮤지컬',
-  9648: '미스터리',
-  10749: '로맨스',
-  878: 'SF',
-  10770: 'TV 영화',
-  53: '스릴러',
-  10752: '전쟁',
-  37: '서부'
+  28: '액션', 12: '모험', 16: '애니메이션', 35: '코미디', 80: '범죄', 99: '다큐멘터리',
+  18: '드라마', 10751: '가족', 14: '판타지', 36: '역사', 27: '공포', 10402: '뮤지컬',
+  9648: '미스터리', 10749: '로맨스', 878: 'SF', 10770: 'TV 영화', 53: '스릴러', 10752: '전쟁', 37: '서부'
 }
 
 const genreNames = computed(() => {
-  // 장르 이름을 한글로 변환 후 앞 두 개만 가져오기
   return movie.value.genres
     ? movie.value.genres.slice(0, 2).map(genre => genreMapping[genre.id] || genre.name).join(' #')
     : ''
 })
 
-const isLiked = computed(() => {
-  return counterStore.likedMovies.includes(movie.value.id)
+// 게시글 작성자 확인
+const canEdit = computed(() => {
+  return movie.value.user_token === userToken // 게시글의 작성자 토큰과 현재 사용자 토큰이 같으면 수정 가능
 })
 
 onMounted(() => {
@@ -108,21 +99,22 @@ onMounted(() => {
     if (selectedMovie) {
       movie.value = selectedMovie
       fetchTrailer(selectedMovie.title)
-      fetchCast(selectedMovie.id) // 캐스트 정보 가져오기
-      fetchMovieDetails(selectedMovie.id) // 영화 세부 정보 가져오기
+      fetchCast(selectedMovie.id)
+      fetchMovieDetails(selectedMovie.id)
     } else {
       console.error('Movie not found')
     }
   })
 })
 
-// TMDb API를 사용해 영화의 세부 정보를 가져오는 함수 (장르 포함)
+// TMDb API를 사용해 영화의 세부 정보를 가져오는 함수
 const fetchMovieDetails = async (movieId) => {
   const url = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${TMDB_API_KEY}`
   try {
     const response = await fetch(url)
     const data = await response.json()
-    movie.value.genres = data.genres // 장르 정보 추가
+    movie.value.genres = data.genres
+    movie.value.user_token = data.user_token // 게시글 작성자 토큰을 영화 데이터에 추가 (여기서는 예시로 데이터에 포함)
   } catch (error) {
     console.error('Error fetching movie details:', error)
   }
@@ -134,26 +126,21 @@ const fetchCast = async (movieId) => {
   try {
     const response = await fetch(url)
     const data = await response.json()
-    cast.value = data.cast.slice(0, 10) // 최대 10명의 캐스트 정보 가져오기
+    cast.value = data.cast.slice(0, 10)
   } catch (error) {
     console.error('Error fetching cast:', error)
   }
 }
 
 const handleAnimationEnd = () => {
-  // 마지막 캐스트 항목이 보이면 애니메이션을 멈추도록 처리
   const castItemsWrapper = document.querySelector('.cast-items-wrapper');
   const castItems = document.querySelectorAll('.cast-item');
-  
-  // 마지막 캐스트 항목의 오른쪽 끝이 화면을 벗어나는지 확인
-  const lastItem = castItems[castItems.length - 1]; // 마지막 항목
+  const lastItem = castItems[castItems.length - 1];
   const lastItemRight = lastItem.getBoundingClientRect().right;
 
   if (lastItemRight <= window.innerWidth) {
-    // 마지막 항목이 화면에 보이면 애니메이션을 멈추기
     castItemsWrapper.style.animationPlayState = 'paused';
   } else {
-    // 그렇지 않으면 애니메이션 계속 진행
     castItemsWrapper.style.animationPlayState = 'running';
   }
 }
@@ -166,7 +153,6 @@ const fetchTrailer = async (title) => {
   try {
     const response = await fetch(url)
     const data = await response.json()
-
     if (data.items && data.items.length > 0) {
       const videoId = data.items[0].id.videoId
       trailerUrl.value = `https://www.youtube.com/embed/${videoId}?autoplay=1`
@@ -178,15 +164,31 @@ const fetchTrailer = async (title) => {
   }
 }
 
-// 좋아요 토글
-const toggleLike = () => {
-  if (isLiked.value) {
-    counterStore.removeLikedMovie(movie.value.id)
-  } else {
-    counterStore.addLikedMovie(movie.value.id)
+// 수정 페이지로 이동
+const editPost = () => {
+  router.push(`/edit-post/${movie.value.id}`)
+}
+
+// 게시글 삭제
+const deletePost = async () => {
+  const confirmation = confirm('정말로 이 게시글을 삭제하시겠습니까?')
+  if (confirmation) {
+    try {
+      await axios.delete(`http://localhost:8000/api/posts/${movie.value.id}/`, {
+        headers: {
+          Authorization: `Token ${userToken}`,
+        }
+      })
+      alert('게시글이 삭제되었습니다.')
+      router.push('/community')
+    } catch (error) {
+      console.error('게시글 삭제 오류:', error)
+      alert('게시글 삭제에 실패했습니다.')
+    }
   }
 }
 </script>
+
 
 <style scoped>
 @import url('//fonts.googleapis.com/earlyaccess/nanummyeongjo.css');
@@ -214,6 +216,8 @@ const toggleLike = () => {
 .detail__image {
   margin-top: 25px;
   width: 75%;
+  max-width: 700px;
+  max-height: 1000px;
   border-radius: 10px;
   box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
 }
@@ -289,19 +293,18 @@ const toggleLike = () => {
 
 .detail__overview {
   height: 175px;
-  width: 90%;
+  width: 80%;
   font-size: 18px;
   color: #ece8e8;
   line-height: 2.0;
   word-break: keep-all;
   white-space: normal;
-  margin-bottom: 30px;
 }
 
 .media-container {
   display: flex;
   gap: 20px;
-  margin-top: 20px;
+  margin-top: 60px;
 }
 
 .trailer {

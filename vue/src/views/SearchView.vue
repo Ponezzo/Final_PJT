@@ -39,12 +39,12 @@ const onEnter = () => {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  backdrop-filter: blur(10px);
+  /* backdrop-filter: blur(10px); */
   transition: background-color 0.3s ease;
 }
 
 .search-container-dark {
-  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
 }
 
 .search-input {

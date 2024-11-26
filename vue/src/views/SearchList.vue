@@ -49,7 +49,7 @@ const searchQuery = route.query.query
 const movies = ref([]) // 검색된 영화 목록
 const relatedMovies = ref([]) // 장르가 일치하는 관련 영화 목록
 const movieGenres = ref([]) // 첫 번째 영화의 장르
-const TMDB_API_KEY = 'd61d83be3016df68850ebfd3ba458c8c'
+const TMDB_API_KEY = 'bbb257be40e0371adce34ae19dfba804'
 
 // 영화 검색 API
 const fetchMovies = async (query) => {
@@ -194,6 +194,7 @@ watch(() => route.query.query, (newQuery) => {
   -webkit-line-clamp: 2; /* 2줄로 제한 */
   -webkit-box-orient: vertical; /* 세로로 클램프 */
   text-overflow: ellipsis; /* ... 표시 */
+  color: #f5f5f5;
 }
 
 .no-results {
@@ -249,5 +250,6 @@ watch(() => route.query.query, (newQuery) => {
   -webkit-line-clamp: 2; /* 2줄로 제한 */
   -webkit-box-orient: vertical; /* 세로로 클램프 */
   text-overflow: ellipsis; /* ... 표시 */
+  color: #f5f5f5;
 }
 </style>

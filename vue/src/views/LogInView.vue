@@ -52,7 +52,7 @@ const logIn = () => {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-image: linear-gradient(to top, #e7627d 10%, #b8235a 35%, #801357 57%, #3d1635 74%, #1c1a27 100%);
+  background: transparent;
   background-size: cover;
   background-position: center;
   

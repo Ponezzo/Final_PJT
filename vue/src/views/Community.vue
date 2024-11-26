@@ -1,6 +1,6 @@
 <template>
   <div class="community-page">
-    <h1>영화 리뷰 커뮤니티</h1>
+    <h1 class="title"></h1>
 
     <!-- 로딩 상태 처리 -->
     <div v-if="loading">로딩 중...</div>
@@ -79,6 +79,11 @@ onMounted(async () => {
 .community-page {
   text-align: center;
   padding: 20px;
+  height: 100vh;
+}
+
+.title {
+  color: #f5f5f5;
 }
 
 .posts-list {
@@ -101,7 +106,7 @@ onMounted(async () => {
 }
 
 .movie-poster {
-  width: 100%;
+  width: 90%;
   height: auto;
   border-radius: 10px;
 }
@@ -109,14 +114,23 @@ onMounted(async () => {
 .create-post-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #634086;
-  color: white;
+  background-color: #f5f5f5;
+  color: black;
   border-radius: 5px;
   margin-top: 20px;
   text-decoration: none;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;  /* 텍스트를 굵게 설정 */
+  font-family: 'GowunBatang-Regular';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunBatang-Regular.woff') format('woff');
+  font-stretch: semi-expanded;
+  font-style: normal;
 }
 
+
+
 .create-post-button:hover {
-  background-color: #8253b1;
+  background-color: #d1d1d1;
 }
 </style>

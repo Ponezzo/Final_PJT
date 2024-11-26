@@ -4,7 +4,6 @@ import ArticleView from '@/views/ArticleView.vue'
 import DetailView from '@/views/DetailView.vue'
 import SignUpView from '@/views/SignUpView.vue'
 import LogInView from '@/views/LogInView.vue'
-import LogoutView from '@/views/LogoutView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import SearchView from '@/views/SearchView.vue'
 import SearchList from '@/views/SearchList.vue'
@@ -36,11 +35,6 @@ const router = createRouter({
       path: '/login',
       name: 'LogInView',
       component: LogInView
-    },
-    {
-      path: '/logout',
-      name: 'LogoutView',
-      component: LogoutView
     },
     {
       path: '/profile',
